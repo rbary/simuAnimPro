@@ -205,12 +205,29 @@ wlSimulator::SetNumberOfTimeSteps(int t)
 void
 wlSimulator::Reset()
 {
+    //renseignement de le fonction Reset
+    this->Trace("-> Reset()");
+    //pour tout les items du simulateur appeler leur fonction reset
+        for(int i=0;i<this->items.size();i++){
+            this->items.at(i)->Reset();
+        }
+    //puis on reinitialise le pas de temps a zero
+    this->cstep=0;
+    this->Trace("<- Reset()");
 }
 
 void
 wlSimulator::Step()
 {
   this->Trace("-> Step()");
+    //On calcule le step pour tous les items si le pas de temps est inférieur au pas de temps total pour l'animation
+    if(this->cstep < this->nsteps){
+        for(int i=0;i<this->items.size(); i++){
+            this->items.at(i)->Step();
+        }
+    }else{
+        this->Stop();
+    }
 
   // maintenant qu'on est est parvenu a calculer un pas de temps on met a jour l'affichage
   this->viewer->updateGL();
@@ -221,7 +238,8 @@ void
 wlSimulator::Play()
 {
   this->Trace("-> Play() %d %d", this->cstep, this->nsteps);
-
+    //lancement d'un timer
+    this->timer->start();
   this->Trace("<- Play()");
 }
 
@@ -229,7 +247,7 @@ void
 wlSimulator::Stop()
 {
   this->Trace("-> Stop()");
-
+    this->timer->stop();
   this->Trace("<- Stop()");
 }
 
