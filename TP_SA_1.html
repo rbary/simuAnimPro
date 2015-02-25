@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/Math/DTD/mathml2/xhtml-math11-f.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/Math/DTD/mathml2/xhtml-math11-f.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr-FR" lang="fr"><head profile="http://dublincore.org/documents/dcq-html/">
+  <title>Projet SA 1 - Modélisation de la trajectoire d'une balle qui rebondit au sol</title><link href="TP_SA_1_fichiers/bjstyle1.css" rel="stylesheet" type="text/css">
+  <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <meta name="DC.date" content="2004-09-25T11:48:15">
+  <meta name="DC.language" content="fr-FR">
+  <link href="TP_SA_1_fichiers/htmlize_style.css" rel="stylesheet" type="text/css"></head>
+<body style="direction: ltr;">
+
+<h1>Projet SA 1 - Modélisation de la trajectoire d'une balle qui rebondit au sol</h1>
+
+<p class="author">Wilfrid Lefer</p>
+
+<h2>Description du projet</h2>
+Il s'agit de simuler l'évolution d'un ensemble de balles de tennis dans l'espace, celles-ci étant dotées d'une vitesse initiale propre et soumises à l'attraction terrestre.<p>
+Afin que vous vous concentriez sur l'essentiel, une petite application vous est fournie, qui comporte les classes suivantes :
+<ul><li>+ <em>saProject</em> décrit l'interface graphique en Qt de l'application, qui permet de définir les paramètres suivants : position et vitesse initiales de deux balles, nombre de pas de temps de la simulation et durée d'un pas de temps, fonctions Reset, Step, Play et Stop, permettant de jouer la simulation, et enfin 2 interacteurs permettant d'afficher le contenu des classes manipulées,</li>
+    <li>+ <em>wlMesh</em> décrit une mesh tolopogique et fournit de nombreuses méthodes pour le parcours des meshes,</li>
+    <li>+ <em>wlAnimatedMesh</em> décrit une mesh animée : il s'agit d'un sous-classe de <em>wlMesh</em> dotée de fonctionnalités d'animation génériques,</li>
+    <li>+ <em>wlAnimatedSphere</em> est une sphère animée, permettant de représenter une balle,</li>
+    <li>+ <em>wlSimulationEnvironment</em> représente un environnement de simulation, autrement dit la liste des obstacles fixes parmi lesquels évoluent les balles,</li>
+    <li>+ <em>wlGround</em> représente une instanciation de l'environnement de simulation sous forme d'un simple sol à Z=0,</li>
+    <li>+ <em>wlCage</em> représente une autre instanciation de l'environnement de simulation sous forme d'une cage ouverte vers le haut,</li>
+    <li>+ <em>wlSimulator</em> est la classe qui pilote la simulation,</li>
+    <li>+ quelques autres classes qui sont utiles à la réalisation de cette application : <em>wlCore</em>, <em>wlMacros</em>, <em>saViewer</em>, <em>wlQGLViewer</em>.</li>
+</ul><p>
+Le calcul du déplacement des balles en fonction de leur vitesse initiale et de la force gravitationnelle, qui a fait l'objet d'un TD, est déjà fait (voir méthode <em>wlAnimatedMesh::step()</em>). Il vous est demandé :
+<ol><li>de gérer l'animation, autrement dit de piloter la mise à jour des positions des balles à chaque pas de temps,</li>
+    <li>de détecter les collisions et de calculer la réponse à chaque collision.</li></ol>
+
+<h2>Travail à effectuer</h2>
+<ol><li>Renseigner les méthodes <em>wlSimulator::Reset()</em>, <em>wlSimulator::Play()</em>, <em>wlSimulator::Step()</em> et <em>wlSimulator::Stop()</em>, chargées de gérer l'animation des balles.</li>
+    <li>Intégrer les collisions des balles avec leur environnement en écrivant le corps des méthodes <em>wlGround::ComputeCollision()</em>, <em>wlAnimatedSphere::ComputeCollisionWithPlan()</em> et <em>wlAnimatedSphere::ComputeReaction()</em> et en modifiant la méthode <em>wlSimulator::Step()</em> en conséquence,</li>
+    <li>Intégrer les collisions des balles entre elles en écrivant le corps de la méthode <em>wlAnimatedSphere::ComputeCollisionWithOther()</em> et en modifiant la méthode <em>wlSimulator::Step()</em> en conséquence,</li>
+    <li>Renseigner la méthode <em>wlCage::ComputeCollision()</em> et instancier une cage en lieu et place du sol en remplaçant <em>wlGround</em> par <em>wlCage</em> dans le fichier <em>saProject.cxx</em>.</li>
+</ol><p>
+Pour le calcul de la réponse aux collisions on pourra se contenter de la méthode la plus simple vue en cours.
+
+<h2>Documentation des classes et déboggage</h2>
+Toutes les classes sont documentées dans le code et vous pouvez générer la documentation en utilisant l'outil <em>Doxygen</em>.<p>
+Toutes les classes peuvent également basculer en mode déboggage en lançant l'application avec l'option <em>-debug</em>, ce qui vous permet de suivre l'évolution du programme au travers des différents appels de fonctions.
+
+</body></html>
