@@ -44,5 +44,13 @@ wlGround::ComputeCollision(wlAnimatedMesh *am)
     this->Error("ComputeCollision: pointeur sur mesh null");
     return QVector<double>();
   }
+  /////////////////////////////////////////////////////////////
+  QVector<double> equationGround; //Definit l'équation du plan qui represente le sol
+  equationGround.push_back(0); // x
+  equationGround.push_back(0); // y
+  equationGround.push_back(1); // z
+  equationGround.push_back(0); //d
+  am->ComputeCollisionWithPlan(equationGround);
+  /////////////////////////////////////////////////////////////
   return QVector<double>();
 }

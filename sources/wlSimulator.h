@@ -15,6 +15,8 @@
 #include <saViewer.h>
 #include <wlAnimatedMesh.h>
 #include <wlSimulationEnvironment.h>
+using namespace std;
+#include <QDebug>
 
 /** \brief wlSimulator est la classe qui pilote l'animation dans les projets de SA.
 */
