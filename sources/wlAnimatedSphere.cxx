@@ -58,8 +58,10 @@ wlAnimatedSphere::ComputeCollisionWithPlan(QVector<double> equationPtNorm)
     double rayon;                   //rayon de la sphere
     double distance;                //distance entre le centre de la sphere et un point du plan considere
     double next_distance;           //distance entre le centre de la sphere et le sol au pas de temps suivant
+    QVector<double> impact_values;  //valeurs associées a la collision
 
-    int k=0;                        //le nombre de division du pas de temps jusqu'a obtention d'une collision
+
+    //int k=0;                        //le nombre de division du pas de temps jusqu'a obtention d'une collision
 
     unPoint.setX(1);
     unPoint.setY(1);
@@ -97,74 +99,65 @@ wlAnimatedSphere::ComputeCollisionWithPlan(QVector<double> equationPtNorm)
     rayon = this->GetRadius();
 
     distance = centreSphere.distanceToPlane(unPoint,normale);
-    qDebug()<<"distance "<<distance;
+    //qDebug()<<"distance "<<distance;
 
     next_distance = next_center.distanceToPlane(unPoint,normale);
-    qDebug()<<"next_distance "<<next_distance;
+    //qDebug()<<"next_distance "<<next_distance;
 
 
     if( distance > 0){
-        qDebug()<<"centre de la balle au dessu du sol";
+        //qDebug()<<"centre de la balle au dessu du sol";
         if(distance-rayon > tolerance){
             qDebug()<<"aucune collision detectee";
         }
 
         if( (distance-rayon <= this->tolerance) && (distance-rayon >= 0) ){
             qDebug()<<"collision detectee***********************************";
-            //on remet la valeur du time step a sa valeur initiale
-            this->timestep = 0.1;
 
-            //preparation des valeurs associees au point d'impact [vitesse courante(vecteur incident), coordonnées du point d'impact)]
-            QVector<double> impact_values;
-            impact_values.push_back(normale.x());
-            impact_values.push_back(normale.y());
-            impact_values.push_back(normale.z());
+            qDebug()<<"next_distance "<<next_distance;
+            qDebug()<<"distance "<<distance;
+
+            //on remet la valeur du time step a sa valeur initiale
+            //this->timestep = 0.1;
+
+            //preparation des valeurs associees au point d'impact [point d'impact et normale en ce point]
 
             impact_values.push_back(centreSphere.x());
             impact_values.push_back(centreSphere.y());
             impact_values.push_back(distance);
 
-            //appel de compute reaction
-            //this->ComputeReaction(impact_values);
+            impact_values.push_back(normale.x());
+            impact_values.push_back(normale.y());
+            impact_values.push_back(normale.z());
+
+
+
+            //appel de la reaction a la collision
+            this->ComputeReaction(impact_values);
             return QVector<double> ();
         }
 
-        if( distance-rayon < 0 ){
+        /*if( distance-rayon < 0 ){
             qDebug()<<"collision tardive";
-        }
+        }*/
 
         if( next_distance-rayon < 0){
             qDebug()<<"collision tardive imminente !!!!!";
-            this->timestep=timestep/5;
-            k+=1;
-            qDebug()<<this->timestep <<k;
+            qDebug()<<"next_distance "<<next_distance;
+            qDebug()<<"distance "<<distance;
+
+            double distance_enfoncement = fabs(next_distance - rayon);
+            qDebug()<<"distance_enfoncement prevue"<< distance_enfoncement;
+
+            //on calcule la valeur ideale de la position du centre de la sphere suivant z au prochain step
+            double z_ideal = next_center.z() + distance_enfoncement;    //puis on passe cette valeur a la fn computeReaction
+
+            impact_values.push_back(z_ideal);
+
+            //appel de compute reaction
+            this->ComputeReaction(impact_values);
         }
     }
-
-    /*if(distance-rayon > this->tolerance){
-        qDebug()<<"Aucune collision detectee";
-        if( next_distance > this->tolerance ){
-            qDebug()<<"aucune Collision au prochain step";
-        }
-
-        if( next_distance < 0){
-            qDebug()<<"collision tardive imminente";
-        }
-
-        if( next_distance-rayon < 0 ){
-            qDebug()<<"Collision tardive detectee";
-            return QVector<double> ();
-        }
-        return QVector<double> ();
-
-    }
-
-    if( (distance-rayon <= this->tolerance) && (distance-rayon >= 0) ){
-        qDebug()<<"Collision detectee";
-        return QVector<double> ();
-    }*/
-
-
   ////////////////////////////////////////////////////////////////
   return QVector<double> ();
   this->Trace("<- ComputeCollisionWithPlan");
@@ -179,42 +172,62 @@ wlAnimatedSphere::ComputeCollisionWithOther(wlAnimatedMesh *other)
 void
 wlAnimatedSphere::ComputeReaction(QVector<double> impact)
 {
+    if(impact.size() > 1 && impact.size() < 6){
+        return;
+    }
+    qDebug()<<"cvel "<<cvel.at(0) <<cvel.at(1) <<cvel.at(2);
     qDebug()<<"compute reaction start here";
-    this->Trace("-> ComputeReaction()");
-        if (impact.size() < 6)
-            return ;
+    if (impact.size() == 1){
+        //traitement d'une collision tardive imminente : MAJ de la vitesse suivant z pour une position du centre de la balle ideal au prochain pas de temps
+        double ccenter_z = this->GetCurrentCenter().at(2);
+        this->cvel.insert(2, (2 * ( (impact.at(0) - ccenter_z)/this->timestep) + 9.81 * this->timestep));
 
-    QVector3D vitesse_incidente;
-    QVector3D normale;
-    QVector3D point_impact;
-    QVector3D vitesse_resultante;
+        qDebug()<<"cvel "<<cvel.at(0) <<cvel.at(1) <<cvel.at(2);
+    }
 
-    /*incident_speed.setX(this->cvel.at(0));
-    incident_speed.setY(this->cvel.at(1));
-    incident_speed.setZ(this->cvel.at(2));*/
-    //this->Trace("Vitesse incidente : %f, %f, %f",incident_speed.x(),incident_speed.y(),incident_speed.z());
+    //this->Trace("-> ComputeReaction()");
+    if (impact.size() == 6){
 
-    vitesse_incidente.setX(this->cvel.at(0));
-    vitesse_incidente.setY(this->cvel.at(1));
-    vitesse_incidente.setZ(this->cvel.at(2));
+        QVector3D vitesse_incidente;
+        QVector3D normale;
+        QVector3D point_impact;
+        QVector3D vitesse_resultante;
+
+        /*incident_speed.setX(this->cvel.at(0));
+        incident_speed.setY(this->cvel.at(1));
+        incident_speed.setZ(this->cvel.at(2));*/
+        //this->Trace("Vitesse incidente : %f, %f, %f",incident_speed.x(),incident_speed.y(),incident_speed.z());
+
+        vitesse_incidente.setX(this->cvel.at(0));
+        vitesse_incidente.setY(this->cvel.at(1));
+        vitesse_incidente.setZ(this->cvel.at(2) + this->cvel_p.at(2));
+        qDebug()<<"vitesse_incidente"<<vitesse_incidente.x() <<vitesse_incidente.y() <<vitesse_incidente.z() ;
 
 
-    point_impact.setX(impact.at(0));
-    point_impact.setY(impact.at(1));
-    point_impact.setZ(impact.at(2));
-    //this->Trace("impact_point : %f, %f, %f",impact_point.x(),impact_point.y(),impact_point.z());
+        point_impact.setX(impact.at(0));
+        point_impact.setY(impact.at(1));
+        point_impact.setZ(impact.at(2));
+        qDebug()<<"point_impact"<<point_impact.x() <<point_impact.y() <<point_impact.z();
 
-    normale.setX(impact.at(3));
-    normale.setY(impact.at(4));
-    normale.setZ(impact.at(5));
-    //this->Trace("normal : %f, %f, %f",normal.x(),normal.y(),normal.z());
+        normale.setX(impact.at(3));
+        normale.setY(impact.at(4));
+        normale.setZ(impact.at(5));
+        qDebug()<<"normale"<<normale.x() <<normale.y() <<normale.z();
+        //this->Trace("normal : %f, %f, %f",normal.x(),normal.y(),normal.z());
 
-    vitesse_resultante = (vitesse_incidente - (2 * QVector3D::dotProduct(vitesse_incidente,normale)*normale))*this->k;
-    //this->Trace("resultant_speed : %f, %f, %f",resultant_speed.x(),resultant_speed.y(),resultant_speed.z());
+        //calcul du produit scalaire entre le vect vitesse de la balle et la normale au plan
+        double scal_in = QVector3D::dotProduct(vitesse_incidente,normale);
+        qDebug()<<"produit scalaire"<<scal_in;
 
-    this->cvel.insert(0, vitesse_resultante.x()) ;
-    this->cvel.insert(1, vitesse_resultante.y()) ;
-    this->cvel.insert(2, vitesse_resultante.z()) ;
+        vitesse_resultante.setX( (vitesse_incidente.x() - 2 * scal_in * normale.x()) * /*this->k*/ 0.8);
+        vitesse_resultante.setY( (vitesse_incidente.y() - 2 * scal_in * normale.y()) * /*this->k*/ 0.8);
+        vitesse_resultante.setZ( (vitesse_incidente.z() - 2 * scal_in * normale.z()) * /*this->k*/ 0.8);
+        qDebug()<<"vitesse_resultante"<<vitesse_resultante.x() <<vitesse_resultante.y() <<vitesse_resultante.z() ;
+
+        this->cvel.insert(0, vitesse_resultante.x()) ;
+        this->cvel.insert(1, vitesse_resultante.y()) ;
+        this->cvel.insert(2, vitesse_resultante.z()) ;
+    }
 
     this->Trace("<- ComputeReaction()");
 }
