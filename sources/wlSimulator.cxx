@@ -227,13 +227,16 @@ wlSimulator::Step()
         }
 
         for (int i = 0; i < items.size(); ++i) {
-                 //items.at(i)->ComputeReaction(this->environment->ComputeCollision(items.at(i)));
-                 this->environment->ComputeCollision(items.at(i));
-                 /*for (int j = i+1; j < items.size()-1; ++j) {
-                           this->Trace("i=%d , j=%d",i,j);
-                          items.at(i)->ComputeCollisionWithOther(items.at(j));
-                  }*/
-              }
+             this->environment->ComputeCollision(items.at(i));
+
+             for (int j = 0; j < items.size(); j++) {
+                 if(i != j){
+                     this->Trace("i=%d , j=%d",i,j);
+                     items.at(i)->ComputeCollisionWithOther(items.at(j));
+                 }
+             }
+        }
+        cstep ++;
     }else{
         this->Stop();
     }

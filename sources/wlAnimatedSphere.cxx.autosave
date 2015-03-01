@@ -292,9 +292,9 @@ wlAnimatedSphere::ComputeReaction(QVector<double> impact)
         double scal_in = QVector3D::dotProduct(vitesse_incidente,normale);
         qDebug()<<"produit scalaire"<<scal_in;
 
-        vitesse_resultante.setX( (vitesse_incidente.x() - 2 * scal_in * normale.x()) * /*this->k*/ 0.85);
-        vitesse_resultante.setY( (vitesse_incidente.y() - 2 * scal_in * normale.y()) * /*this->k*/ 0.85);
-        vitesse_resultante.setZ( (vitesse_incidente.z() - 2 * scal_in * normale.z()) * /*this->k*/ 0.85);
+        vitesse_resultante.setX( (vitesse_incidente.x() - 2 * scal_in * normale.x()) * /*this->k*/ 0.75);
+        vitesse_resultante.setY( (vitesse_incidente.y() - 2 * scal_in * normale.y()) * /*this->k*/ 0.75);
+        vitesse_resultante.setZ( (vitesse_incidente.z() - 2 * scal_in * normale.z()) * /*this->k*/ 0.75);
         qDebug()<<"vitesse_resultante"<<vitesse_resultante.x() <<vitesse_resultante.y() <<vitesse_resultante.z() ;
 
         this->cvel.insert(0, vitesse_resultante.x()) ;
